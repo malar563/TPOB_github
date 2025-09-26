@@ -41,7 +41,7 @@ void setup() {
   }
 
   // Print les données
-  Serial.println(Rouge, IR);
+  Serial.println("Rouge, IR");
   for (int i = 0; i < nLoop; i++) {
     Serial.print(dataRouge[i]);
     Serial.print(",");
