@@ -78,11 +78,11 @@ for i, color in enumerate(colors):
 print(ratios_colors)
 
 def SpO2(list_ratios_IR, list_ratios_R):
-    ratio_R = np.median(list_ratios_R) # IminR/ImaxR
-    ratio_IR = np.median(list_ratios_IR) # IminIR/ImaxIR
+    ratio_R = np.mean(list_ratios_R) # IminR/ImaxR
+    ratio_IR = np.mean(list_ratios_IR) # IminIR/ImaxIR
 
     r=np.log(ratio_R)/np.log(ratio_IR)
-    SpO2 = ((0.81-0.18)*r)/(0.81-0.08+((0.29-0.18)*r))
+    SpO2 = (0.81-0.18*r)/(0.81-0.08+((0.29-0.18)*r))
 
     return SpO2
 
