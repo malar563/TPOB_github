@@ -19,13 +19,15 @@ make_plots_look_good()
 
 df = pd.read_csv('oxymetrie_data.csv', sep=",")
 
-# Selon la saturation du vert au début du .csv, ça semble être du 19 bits : valeur de 0 à (2^19)-1
+df = df[df["Time"] >= df["Time"].iloc[-1] - 25] # Garder les 25 dernières secondes
 
+# Selon la saturation du vert au début du .csv, ça semble être du 19 bits : valeur de 0 à (2^19)-1
 time = np.array(df["Time"])
 ir = np.array(df["IR"])/2**19
 red = np.array(df["Red"])/2**19
 green = np.array(df["Green"])/2**19
 blue = np.array(df["Blue"])/2**19
+
 
 colors = [ir, red, green, blue]
 plot_color = ["black", "red", "green", "blue"]
@@ -39,10 +41,12 @@ for i, color in enumerate(colors):
 
     plt.plot(time, color, color=plot_color[i], label=(plot_color[i] if i!= 0 else "IR"))
     plt.plot(time[maximums[i]], color[maximums[i]], color=plot_color[i], marker="o", ls="None")
+    plt.plot(time[minimums[i]], color[minimums[i]], color=plot_color[i], marker="o", ls="None")
 
     time_between_peaks = time[maximums[i]][1:] - time[maximums[i]][:-1]
-    sec_par_b_medians.append(np.median(time_between_peaks))
+    sec_par_b_medians.append(np.mean(time_between_peaks)) # médiane enlevée
 
+print(sec_par_b_medians)
 sec_par_b = np.mean(sec_par_b_medians)
 i_sec_par_b = np.std(sec_par_b_medians)
 bpm = 60/sec_par_b
@@ -75,19 +79,44 @@ for i, color in enumerate(colors):
     
     ratios_colors.append(ratios)
 
-print(ratios_colors)
+# print(ratios_colors)
 
 def SpO2(list_ratios_IR, list_ratios_R):
     ratio_R = np.mean(list_ratios_R) # IminR/ImaxR
+    i_ratio_R = np.std(list_ratios_R)
     ratio_IR = np.mean(list_ratios_IR) # IminIR/ImaxIR
+    i_ratio_IR = np.std(list_ratios_IR)
+    print("ratio", i_ratio_R, i_ratio_IR)
 
     r=np.log(ratio_R)/np.log(ratio_IR)
+    i_log_num = np.abs(i_ratio_R/ratio_R)
+    i_log_denum = np.abs(i_ratio_IR/ratio_IR)
+    print("log ratio", i_log_num, i_log_denum)
+    i_r = r*np.sqrt((i_log_num/np.log(ratio_R))**2 + (i_log_denum/np.log(ratio_IR))**2 - 2*(i_log_num*i_log_denum/(np.log(ratio_R)*np.log(ratio_IR))))
+    print("r", i_r)
+
     SpO2 = (0.81-0.18*r)/(0.81-0.08+((0.29-0.18)*r))
+    i_spo2_num = i_r
+    i_spo2_denum = i_r
+    print("num denum spo2", i_spo2_num, i_spo2_denum)
+    i_SpO2 = SpO2*np.sqrt((i_spo2_num/(i_r))**2 + (i_spo2_denum/(i_r))**2 - 2*(i_spo2_num*i_spo2_denum/(i_r**2)))
+    i_SpO2 = np.abs(-0.2205/(0.73+0.11*r))*i_r # Chat
 
-    return SpO2
+    return SpO2, i_SpO2
+
+spo2, i_spo2 = SpO2(ratios_colors[0], ratios_colors[1])
+print("SpO2 calculé :", spo2, i_spo2)
 
 
-print("SpO2 calculé :", SpO2(ratios_colors[0], ratios_colors[1]))
 
 
+plt.plot(time, colors[0], color=plot_color[0], label="Infrarouge", linestyle="solid")
+plt.plot(time, colors[1], color=plot_color[1], label="Rouge", linestyle="dashed")
+plt.plot(time, colors[2], color=plot_color[2], label="Vert", linestyle="dotted")
+plt.plot(time, colors[3], color=plot_color[3], label="Bleu", linestyle="dashdot")
+plt.legend(loc="upper left", fontsize=14)
+plt.ylabel("Intensité normalisée [-]", fontsize=14)
+plt.xlabel("Temps [s]", fontsize=14)
+plt.figtext(0.2, 0.5, f"bpm = {bpm:.0f}±{i_bpm:.0f}\nSpO2 = {100*spo2:.2f}±{i_spo2:.2f}", fontsize=14)
+plt.show()
 
