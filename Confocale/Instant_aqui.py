@@ -6,16 +6,20 @@ Voltage and frequency ranges depend on the Red Pitaya model.
 """
 #!/usr/bin/env python3
 
-import sys
-import redpitaya_scpi as scpi
+# import sys
+# import redpitaya_scpi as scpi
 import matplotlib.pyplot as plot
 
-IP = 'rp-f066c8.local'
+# IP = 'rp-f066c8.local'
 
-rp = scpi.scpi(IP)
+# rp = scpi.scpi(IP)
+
+# Nous ici
+# import Wave_gen
+from Wave_gen import rp
 
 rp.tx_txt('ACQ:RST')
-
+print("allo")
 rp.tx_txt('ACQ:DEC 4')
 rp.tx_txt('ACQ:START')
 rp.tx_txt('ACQ:TRig NOW')
