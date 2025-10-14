@@ -11,10 +11,10 @@ import redpitaya_scpi as scpi
 IP = "10.68.9.123"
 rp = None
 
-
+n = 512     # nombre de pixels d'un côté de l'image (ex: image de 512 x 512 pixels donne n = 512)
 wave_form = 'TRIANGLE' # SINE, SQUARE, TRIANGLE, RAMPUP, RAMPDOWN, DC
 freq = 175  # Hz
-freq2 = 175/256  # Hz
+freq2 = freq/n  # Hz, car balaye 1024 pixels en x alors que 2 pixels en y sont balayés
 ampl = 1
 
 try:
