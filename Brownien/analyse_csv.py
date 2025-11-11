@@ -4,14 +4,14 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-petits_chemins = r"Brownien/petits_chemins.csv"
+petits_chemins = r"Brownien/petits_chemins_1.csv"
 # Pk ça coupe à la ligne 430?? C'est quoi ce qu'il y a après?
 # Pk le tracking de particules est surtout concentré au début de la prise de données?
 
-m_par_px = 0.22e-6
+m_par_px = 2.18e-7
 sigma_m_par_px = 0.0015e-6 # n'est pas du tout l'élément limitant ici
 
-df = pd.read_csv(petits_chemins, na_values=[" "], nrows=430) # Parce qu'après se met à track d'autres particules
+df = pd.read_csv(petits_chemins, na_values=[" "], nrows=300) # Parce qu'après se met à track d'autres particules (430 pour 0, )
 
 for i in range(1,40):
     df1 = df[df[f"X{i}"]==df[f"X{i}"]] # Propriété des NaN : comparer un Nan avec lui même donne faux
@@ -104,8 +104,8 @@ plt.legend()
 plt.show()
 
 def boltzmann(D, T=297, eta=0.0092, r=1e-4):
-    # eta = 0.01 g cm^-1 s^-1 à 293K mais diminue de 2% par K : observation à 297K
-    # r = 1um à mettre en cm pour fiter avec eta
+    eta = 0.92# eta = 0.01 g cm^-1 s^-1 à 293K mais diminue de 2% par K : observation à 297K
+    r = 1e-6 # r = 1um à mettre en cm pour fiter avec eta
     return 6*np.pi*eta*r*D/T
 
 print("Constante de Boltzmann :", boltzmann(D),"±", boltzmann(sigma_D))
