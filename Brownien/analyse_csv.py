@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-petits_chemins = r"Brownien/petits_chemins_1.csv"
+petits_chemins = r"Brownien/chemins_moins_exclusifs.csv"
 # Pk ça coupe à la ligne 430?? C'est quoi ce qu'il y a après?
 # Pk le tracking de particules est surtout concentré au début de la prise de données?
 
