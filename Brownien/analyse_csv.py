@@ -44,6 +44,12 @@ while True:
 # Calcul de la moyenne <r^2(t)>, <x(t)> et <y(t)>
 r2_df = pd.concat(r2_all, axis=1) # r2_all est une liste de series, on la concatène avec pandas (crée un dataframe)
 r2_df = r2_df[1:-1] # Enlever les NaN aux extrémités
+
+# Enlever ceux trop court (change rien)
+counts = r2_df.count(axis=0)   # nombre de valeurs non-NaN pour chaque particule
+long_tracks = counts[counts > 100].index
+r2_df = r2_df[long_tracks]
+
 t = r2_df.index*0.5 # Multiplier par le temps d'exposition pour convertir en secondes
 r2_mean = r2_df.mean(axis=1) # Moyenne par rapport à l'horizontale (au temps)
 r2_std = r2_df.std(axis=1)
@@ -89,10 +95,12 @@ print(D, sigma_D)
 
 # <r^2(t)> selon t
 plt.figure()
-plt.plot(t, r2_mean.values)
-plt.plot(t, lineaire(t, D))
+# plt.scatter(t, r2_mean.values, c="black")
+plt.errorbar(t, r2_mean.values, yerr=r2_std.values, fmt='o', c="black", label="Données")
+plt.plot(t, lineaire(t, D), c="r", label="Courbe ajustée")
 plt.xlabel("Temps (s)")
 plt.ylabel(r"$\langle r^2(t) \rangle$")
+plt.legend()
 plt.show()
 
 def boltzmann(D, T=297, eta=0.0092, r=1e-4):
