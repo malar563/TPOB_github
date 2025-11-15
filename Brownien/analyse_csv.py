@@ -145,7 +145,7 @@ unc = kb[1].value / 10**exp
 # Construire la chaîne LaTeX
 kb_text = fr"$k_B = ({mant:.1f} \pm {unc:.1f}) \times 10^{{{exp}}}$ J/K"
 
-
+from matplotlib.ticker import ScalarFormatter
 plt.figure()
 plt.plot(t, r2_mean.values, c="black")
 plt.fill_between(t, r2_mean.values - r2_std.values, r2_mean.values + r2_std.values, color="black", alpha=0.5, label="Incertitude (±SEM)")
@@ -156,6 +156,10 @@ plt.fill_between(t, r2_mean.values - r2_std.values, r2_mean.values + r2_std.valu
 plt.text(5, 6e-11, kb_text, horizontalalignment='center', verticalalignment='center')
 plt.plot(t, lineaire(t, D), c="r", label="Courbe ajustée", linestyle="--")
 plt.xlabel("Temps [s]")
-plt.ylabel(r"$\langle r^2(t) \rangle$ [m²]")
+
+ax = plt.gca() 
+ax.yaxis.get_offset_text().set_visible(False)
+
+plt.ylabel(r"$\langle r^2(t) \rangle \times 10^{-11}$ [m²]")
 plt.legend()
 plt.show()
