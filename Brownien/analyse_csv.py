@@ -160,6 +160,6 @@ plt.xlabel("Temps [s]")
 ax = plt.gca() 
 ax.yaxis.get_offset_text().set_visible(False)
 
-plt.ylabel(r"$\langle r^2(t) \rangle \times 10^{-11}$ [m²]")
+plt.ylabel(r"$\langle r^2(t) \rangle \times 10^{11}$ [m²]")
 plt.legend()
 plt.show()
