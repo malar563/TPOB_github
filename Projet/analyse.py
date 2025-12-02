@@ -8,14 +8,29 @@ data = pd.read_csv(r"Projet\no_interference.txt", sep = "\t", skiprows=13, decim
 n = len(data[:,0])    # pour avoir le nb de points en fréq
 c = 2.998e8     # [m/s]
 
-params, cov = curve_fit("gaussian", data[:,0], data[:,1])
-print(params)
+lambd=data[:,0]
+intensite = data[:,1]
 
-l0 = ...    # fréquence centrale de la source
+# l0 = ...    # fréquence centrale de la source
 
-dw = 2*np.pi*c * (data[-1,0] - data[0,0])/l0
-lc = 4*c*np.log(2) / dw    # difference de parcours optique doit être plus petit que ça
+# dw = 2*np.pi*c * (data[-1,0] - data[0,0])/l0
+# lc = 4*c*np.log(2) / dw    # difference de parcours optique doit être plus petit que ça
 
-dt = 2*np.pi / dw
-dz = c * dt     # épaisseur min qu'on peut mesurer
-z = dz * n/2    # épaisseur max qu'on peut mesurer
+# dt = 2*np.pi / dw
+# dz = c * dt     # épaisseur min qu'on peut mesurer
+# z = dz * n/2    # épaisseur max qu'on peut mesurer
+
+def gaussienne(x, hauteur, position, std, offset):
+    return hauteur*np.exp(-((x-position)**2)/(2*std**2))+offset
+
+nm = np.arange(300,1000,1)
+p0 = [np.max(intensite), lambd[np.argmax(intensite)], 7, 0.15]
+params0, _ = curve_fit(gaussienne, lambd, intensite, p0=p0)#
+hauteur0, position0, std0, offset0 = params0
+
+print(position0, lambd[np.argmax(intensite)])
+
+
+plt.plot(lambd, intensite)
+plt.plot(nm, gaussienne(nm, hauteur0, position0, std0, offset0))
+plt.show()
