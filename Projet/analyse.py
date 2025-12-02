@@ -11,14 +11,6 @@ c = 2.998e8     # [m/s]
 lambd=data[:,0]
 intensite = data[:,1]
 
-# l0 = ...    # fréquence centrale de la source
-
-# dw = 2*np.pi*c * (data[-1,0] - data[0,0])/l0
-# lc = 4*c*np.log(2) / dw    # difference de parcours optique doit être plus petit que ça
-
-# dt = 2*np.pi / dw
-# dz = c * dt     # épaisseur min qu'on peut mesurer
-# z = dz * n/2    # épaisseur max qu'on peut mesurer
 
 def gaussienne(x, hauteur, position, std, offset):
     return hauteur*np.exp(-((x-position)**2)/(2*std**2))+offset
@@ -31,6 +23,19 @@ hauteur0, position0, std0, offset0 = params0
 print(position0, lambd[np.argmax(intensite)])
 
 
-plt.plot(lambd, intensite)
-plt.plot(nm, gaussienne(nm, hauteur0, position0, std0, offset0))
-plt.show()
+#plt.plot(lambd, intensite)
+#plt.plot(nm, gaussienne(nm, hauteur0, position0, std0, offset0))
+#plt.show()
+
+
+l0 = lambd[np.argmax(intensite)]    # fréquence centrale de la source
+dl = data[-1,0] - data[0,0]
+dw = 2*np.pi*c * (dl)/ (l0**2)
+lc = 4*c*np.log(2) / dw    # difference de parcours optique doit être plus petit que ça
+
+dt = 2*np.pi / dw
+dz = c * dt     # épaisseur min qu'on peut mesurer
+z = dz * n/2    # épaisseur max qu'on peut mesurer
+
+print(lc)
+print(f"dist min = {dz} nm, dist max = {z/1000} um")
