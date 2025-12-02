@@ -141,14 +141,20 @@ mant = float(mant)
 exp = int(exp)
 # Calculer l'incertitude sur la même échelle
 unc = kb[1].value / 10**exp
-
-# Construire la chaîne LaTeX
 kb_text = fr"$k_B = ({mant:.1f} \pm {unc:.1f}) \times 10^{{{exp}}}$ J/K"
+
+D4 = 4*D
+mant_D, exp_D = f"{D4:.3e}".split("e")
+mant_D = float(mant_D)
+exp_D = int(exp_D)
+D_text = fr"$\langle r^2(t) \rangle = {mant_D:.3f}\times 10^{{{exp_D}}}$ t"
+print(D_text)
 
 from matplotlib.ticker import ScalarFormatter
 plt.figure()
 plt.plot(t, r2_mean.values, c="black")
 plt.fill_between(t, r2_mean.values - r2_std.values, r2_mean.values + r2_std.values, color="black", alpha=0.5, label="Incertitude (±SEM)")
+# plt.text(20, 1e-11, D_text, horizontalalignment='center', verticalalignment='center')
 
 # plt.errorbar(t, r2_mean.values, yerr=r2_std.values, fmt='o', c="black", label="Données")
 
