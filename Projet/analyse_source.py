@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-
-data = pd.read_csv(r"Projet\no_interference.txt", sep = "\t", skiprows=13, decimal=",").to_numpy()
+# r"Projet\no_interference.txt"
+data = pd.read_csv(r"Projet\max_central\lamelle_18x18_170um(1).txt", sep = "\t", skiprows=13, decimal=",").to_numpy()
 n = len(data[:,0])    # pour avoir le nb de points en fréq
 c = 2.998e8     # [m/s]
 
@@ -23,9 +23,9 @@ hauteur0, position0, std0, offset0 = params0
 print(position0, lambd[np.argmax(intensite)])
 
 
-#plt.plot(lambd, intensite)
-#plt.plot(nm, gaussienne(nm, hauteur0, position0, std0, offset0))
-#plt.show()
+plt.plot(lambd, intensite)
+plt.plot(nm, gaussienne(nm, hauteur0, position0, std0, offset0))
+plt.show()
 
 
 l0 = lambd[np.argmax(intensite)]    # fréquence centrale de la source
