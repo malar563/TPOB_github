@@ -47,7 +47,7 @@ def smooth(x, smoothing_param=3):
     return y[smoothing_param:-smoothing_param] 
 
 
-def thickness(file_0 : str, file_data : str):
+def get_opd(file_0 : str, file_data : str):
     data_0 = pd.read_csv(file_0, sep = "\t", skiprows=13, decimal=",").to_numpy()      # pas d'échantillon
     data_1 = pd.read_csv(file_data, sep = "\t", skiprows=13, decimal=",").to_numpy()  # échantillon
 
@@ -55,12 +55,12 @@ def thickness(file_0 : str, file_data : str):
     ref = data_0[:,1]
     sample = data_1[:,1]
     c = 299792458
-    plt.plot(wavelenghts, ref, label="no sample data")
-    plt.plot(wavelenghts, sample, label="sample data")
-    plt.xlabel("wavelengths [m]")
-    plt.ylabel("Intensity [-]")
-    plt.legend()
-    plt.show()
+    # plt.plot(wavelenghts, ref, label="no sample data")
+    # plt.plot(wavelenghts, sample, label="sample data")
+    # plt.xlabel("wavelengths [m]")
+    # plt.ylabel("Intensity [-]")
+    # plt.legend()
+    # plt.show()
 
     freqs = 2*np.pi*c / wavelenghts
     w_uniform = np.linspace(freqs.min(), freqs.max(), len(freqs))
@@ -85,34 +85,34 @@ def thickness(file_0 : str, file_data : str):
     I_w_sample = interp_sample(omega_uniform)
 
     # Enlever l'enveloppe dûe à la source
-    plt.plot(omega_sorted, ref_sorted, label="no sample data")
-    plt.plot(omega_sorted, sample_sorted, label="sample data")
-    plt.plot(omega_uniform, I_w_ref, label="no sample interpolation")
-    plt.plot(omega_uniform, I_w_sample, label="sample interpolation")
-    plt.xlabel("fréquences omega [s^-1]")
-    plt.ylabel("Intensity [-]")
-    plt.legend()
-    plt.show()
+    # plt.plot(omega_sorted, ref_sorted, label="no sample data")
+    # plt.plot(omega_sorted, sample_sorted, label="sample data")
+    # plt.plot(omega_uniform, I_w_ref, label="no sample interpolation")
+    # plt.plot(omega_uniform, I_w_sample, label="sample interpolation")
+    # plt.xlabel("fréquences omega [s^-1]")
+    # plt.ylabel("Intensity [-]")
+    # plt.legend()
+    # plt.show()
 
     envelope = smooth(I_w_ref, smoothing_param=12)
     I_mod_ref = I_w_ref - envelope
-    plt.plot(w_uniform, envelope, label="no sample interpolation smoothing (enveloppe)")
-    plt.plot(w_uniform, I_w_ref, label="no sample interpolation")
-    plt.plot(w_uniform, I_mod_ref, label="difference between them")
-    plt.xlabel("fréquences omega [s^-1]")
-    plt.ylabel("Intensity [-]")
-    plt.legend()    
-    plt.show()
+    # plt.plot(w_uniform, envelope, label="no sample interpolation smoothing (enveloppe)")
+    # plt.plot(w_uniform, I_w_ref, label="no sample interpolation")
+    # plt.plot(w_uniform, I_mod_ref, label="difference between them")
+    # plt.xlabel("fréquences omega [s^-1]")
+    # plt.ylabel("Intensity [-]")
+    # plt.legend()    
+    # plt.show()
 
     envelope =  smooth(I_w_sample, smoothing_param=12)
     I_mod_sample = I_w_sample - envelope
-    plt.plot(w_uniform, envelope, label="sample interpolation smoothing (enveloppe)")
-    plt.plot(w_uniform, I_w_sample, label="sample interpolation")
-    plt.plot(w_uniform, I_mod_sample, label="difference between them")
-    plt.xlabel("fréquences omega [s^-1]")
-    plt.ylabel("Intensity [-]")
-    plt.legend()    
-    plt.show()
+    # plt.plot(w_uniform, envelope, label="sample interpolation smoothing (enveloppe)")
+    # plt.plot(w_uniform, I_w_sample, label="sample interpolation")
+    # plt.plot(w_uniform, I_mod_sample, label="difference between them")
+    # plt.xlabel("fréquences omega [s^-1]")
+    # plt.ylabel("Intensity [-]")
+    # plt.legend()    
+    # plt.show()
 
     # fft, calcul des OPD et d
     opt_ref = np.fft.fft(I_mod_ref)
@@ -128,8 +128,8 @@ def thickness(file_0 : str, file_data : str):
 
     xn=OPD[np.argmax(opt_ref)]
     xa=OPD[np.argmax(opt_sample)]
-    d=(xa-xn)/(1.4995-1)
-    print("épaisseur", d)
+    #d=(xa-xn)/(1.4995-1)
+    print(xa, xn)
 
     plt.plot(OPD*1e6, opt_ref, label="No sample")
     plt.plot(OPD*1e6, opt_sample, label="Sample")
@@ -138,12 +138,27 @@ def thickness(file_0 : str, file_data : str):
     plt.ylabel("Intensity [-]")
     plt.show()
 
+    return (xn, xa)
+
 
 # thickness(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
 # thickness(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
 
-thickness(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_18x18_170um(1).txt")
-thickness(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_18x18_170um_1.txt")
+xnc, xac = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_18x18_170um(1).txt")
+xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_18x18_170um_1.txt")
+d = 170e-6
+ng_c = (xac-xnc)/d + 1
+ng_o = (xao-xno)/d + 1
+ng = np.mean([ng_c, ng_o])
+print(ng_c, ng_o, ng)
+
+xnc, xac = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
+xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
+d_n=(xac-xnc)/(ng-1)
+d_o=(xao-xno)/(ng-1)
+d = np.mean([d_n, d_o])
+print(d_n*1e6, d_o*1e6, d*1e6)
+
 
 
 
