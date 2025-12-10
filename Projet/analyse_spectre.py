@@ -128,8 +128,8 @@ def get_opd(file_0 : str, file_data : str):
 
     xn=OPD[np.argmax(opt_ref)]
     xa=OPD[np.argmax(opt_sample)]
-    #d=(xa-xn)/(1.4995-1)
-    print(xa, xn)
+    d=(xa-xn)/(1.4995-1)
+    print(xa, xn, d)
 
     plt.plot(OPD*1e6, opt_ref, label="No sample")
     plt.plot(OPD*1e6, opt_sample, label="Sample")
@@ -140,6 +140,8 @@ def get_opd(file_0 : str, file_data : str):
 
     return (xn, xa)
 
+thickness(r"Projet\09-12-2025\maxcentral_OPDnul.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
+thickness(r"Projet\09-12-2025\maxcentral_OPDnul_decale.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
 
 # thickness(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
 # thickness(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
