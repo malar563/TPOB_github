@@ -38,7 +38,9 @@ def thickness(file_0 : str, file_data : str):
 # TENTATIVE MARYLISE
 
 from scipy.signal.windows import boxcar
+from scipy.signal import argrelmin
 from pylab import r_
+from heapq import nsmallest
 def smooth(x, smoothing_param=3):
     window_len=smoothing_param*2+1
     s=r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
@@ -94,7 +96,7 @@ def get_opd(file_0 : str, file_data : str):
     # plt.legend()
     # plt.show()
 
-    envelope = smooth(I_w_ref, smoothing_param=12)
+    envelope = smooth(I_w_ref, smoothing_param=20)
     I_mod_ref = I_w_ref - envelope
     # plt.plot(w_uniform, envelope, label="no sample interpolation smoothing (enveloppe)")
     # plt.plot(w_uniform, I_w_ref, label="no sample interpolation")
@@ -104,7 +106,7 @@ def get_opd(file_0 : str, file_data : str):
     # plt.legend()    
     # plt.show()
 
-    envelope =  smooth(I_w_sample, smoothing_param=12)
+    envelope =  smooth(I_w_sample, smoothing_param=20)
     I_mod_sample = I_w_sample - envelope
     # plt.plot(w_uniform, envelope, label="sample interpolation smoothing (enveloppe)")
     # plt.plot(w_uniform, I_w_sample, label="sample interpolation")
@@ -126,10 +128,21 @@ def get_opd(file_0 : str, file_data : str):
     opt_ref = np.abs(opt_ref[positif])
     opt_sample = np.abs(opt_sample[positif])
 
-    xn=OPD[np.argmax(opt_ref)]
-    xa=OPD[np.argmax(opt_sample)]
+    peak_idx = np.argmax(opt_ref)
+    valleys_idx = np.insert(argrelmin(opt_ref)[0], 0, 0)
+    valleys = sorted(valleys_idx, key = lambda idx: abs(idx-peak_idx))[:2]
+    xn = (OPD[valleys[0]] + OPD[valleys[1]])/2
+    xn_err = abs(xn - OPD[valleys[0]])
+
+    peak_idx = np.argmax(opt_sample)
+    valleys_idx = argrelmin(opt_sample)[0]
+    valleys = sorted(valleys_idx, key = lambda idx: abs(idx-peak_idx))[:2]
+    xa = (OPD[valleys[0]] + OPD[valleys[1]])/2
+    xa_err = abs(xa - OPD[valleys[0]])
+
     d=(xa-xn)/(1.4995-1)
-    print(xa, xn, d)
+    d_err = (xa_err + xn_err)/(xa-xn) * d
+    print(xa, xa_err, xn, xn_err, d, d_err)
 
     plt.plot(OPD*1e6, opt_ref, label="No sample")
     plt.plot(OPD*1e6, opt_sample, label="Sample")
@@ -138,41 +151,33 @@ def get_opd(file_0 : str, file_data : str):
     plt.ylabel("Intensity [-]")
     plt.show()
 
-    return (xn, xa)
+    return (xn, xa, xn_err, xa_err)
 
-thickness(r"Projet\09-12-2025\maxcentral_OPDnul.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
-thickness(r"Projet\09-12-2025\maxcentral_OPDnul_decale.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
+#thickness(r"Projet\09-12-2025\maxcentral_OPDnul.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
+#thickness(r"Projet\09-12-2025\maxcentral_OPDnul.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um_angle.txt")
 
 # thickness(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
 # thickness(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
 
-xnc, xac = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_18x18_170um(1).txt")
-xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_18x18_170um_1.txt")
-d = 170e-6
+xnc, xac, xnc_err, xac_err = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
+#xnc, xac = get_opd(r"Projet\09-12-2025\maxcentral_OPDnul.txt", r"Projet\09-12-2025\maxcentral_lamelle18x18_170um.txt")
+#xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_18x18_170um_1.txt")
+d = 130e-6
+d_err = 5e-6
 ng_c = (xac-xnc)/d + 1
-ng_o = (xao-xno)/d + 1
-ng = np.mean([ng_c, ng_o])
-print(ng_c, ng_o, ng)
+ng_c_err = ((xac_err + xnc_err)/(xac - xnc) + d_err/d) * (ng_c-1)
+#ng_o = (xao-xno)/d + 1
+#ng = np.mean([ng_c, ng_o])
+print("Indice de groupe:", ng_c, "+-", ng_c_err)#, ng_o, ng)
 
-xnc, xac = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_22x22_130um(1).txt")
-xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
-d_n=(xac-xnc)/(ng-1)
-d_o=(xao-xno)/(ng-1)
-d = np.mean([d_n, d_o])
-print(d_n*1e6, d_o*1e6, d*1e6)
-
-
-
-
-
-
-
-
-
-
-
-
-
+#xnc, xac = get_opd(r"Projet\max_central\max_central_OPDnul.txt", r"Projet\max_central\lamelle_18x18_170um(1).txt")
+xnc, xac, xnc_err, xac_err = get_opd(r"Projet\09-12-2025\maxcentral_OPDnul_decale.txt", r"Projet\09-12-2025\maxcentral_lamelle22x22_130um.txt")
+#xno, xao = get_opd(r"Projet\off-set_avance\off-set_avance.txt", r"Projet\off-set_avance\lamelle_22x22_130um_1.txt")
+d_n=(xac-xnc)/(ng_c-1)
+d_err = ((xac_err + xnc_err)/(xac - xnc) + ng_c_err/(ng_c-1)) * d_n
+#d_o=(xao-xno)/(ng-1)
+#d = np.mean([d_n, d_o])
+print("Epaisseur:", d_n*1e6, "+-", d_err*1e6, "um")#, d_o*1e6, d*1e6)
 
 
 
